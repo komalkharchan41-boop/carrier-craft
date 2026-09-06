@@ -1,1 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCraft AI Pro - Student Career & Degree Advisor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #030712;
+            --card-glass: rgba(17, 24, 39, 0.7);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(99, 102, 241, 0.4);
+            --primary: #6366f1;
+            --accent: #ec4899;
+            --grad-brand: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --grad-card: linear-gradient(180deg, rgba(31, 41, 55, 0.6) 0%, rgba(17, 24, 39, 0.8) 100%);
+            --text-title: #f9fafb;
+            --text-body: #9ca3af;
+            --neon-green: #10b981;
+            --badge-degree: #3b82f6;
+            --badge-diploma: #f59e0b;
+            --badge-course: #10b981;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(236, 72, 153, 0.12) 0px, transparent 50%);
+            color: var(--text-title);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: pageFadeIn 0.5s ease forwards;
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .top-navbar {
+            height: 70px;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-glass);
+            background: rgba(3, 7, 18, 0.7);
+            backdrop-filter: blur(16px);
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--grad-brand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .brand-text h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: var(--grad-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-text p {
+            font-size: 0.75rem;
+            color: var(--text-body);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .live-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--neon-green);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .btn-reset-nav {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            color: var(--text-body);
+            padding: 7px 16px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reset-nav:hover {
+            color: #fff;
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            height: calc(100vh - 70px);
+        }
+
+        .chat-shell {
+            width: 100%;
+            max-width: 950px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--card-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+
+        .chat-stream {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-stream::-webkit-scrollbar { width: 6px; }
+        .chat-stream::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+        .message-bubble-row {
+            display: flex;
+            gap: 14px;
+            max-width: 90%;
+            animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-bubble-row.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .avatar-box {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .avatar-box.bot {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+        }
+
+        .avatar-box.user {
+            background: var(--grad-brand);
+            color: white;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
+        }
+
+        .bubble-content {
+            padding: 18px 24px;
+            border-radius: 20px;
+            font-size: 0.96rem;
+            line-height: 1.65;
+        }
+
+        .message-bubble-row.bot .bubble-content {
+            background: var(--grad-card);
+            border: 1px solid var(--border-glass);
+            color: #e5e7eb;
+            border-top-left-radius: 6px;
+        }
+
+        .message-bubble-row.user .bubble-content {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: #ffffff;
+            border-top-right-radius: 6px;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        @media (max-width: 650px) {
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        .interactive-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: #d1d5db;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .interactive-card:hover {
+            background: rgba(99, 102, 241, 0.14);
+            border-color: var(--primary);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25);
+        }
+
+        .interactive-card span.arrow {
+            color: var(--primary);
+            font-weight: 700;
+            opacity: 0;
+            transform: translateX(-6px);
+            transition: all 0.2s;
+        }
+
+        .interactive-card:hover span.arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Dashboard & Pathways */
+        .dashboard-banner {
+            margin-top: 24px;
+            background: rgba(13, 17, 34, 0.95);
+            border: 1.5px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            animation: modalScaleUp 0.4s ease forwards;
+        }
+
+        @keyframes modalScaleUp {
+            from { opacity: 0; transform: scale(0.96) translateY(14px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .dash-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        .dash-header h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #c7d2fe;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dash-header p {
+            color: var(--text-body);
+            font-size: 0.88rem;
+            margin-top: 6px;
+        }
+
+        .demand-badge {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--neon-green);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            white-space: nowrap;
+        }
+
+        .visual-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 750px) {
+            .visual-row { grid-template-columns: 1fr; }
+        }
+
+        .chart-pod {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 16px;
+            height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metric-pod {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+        }
+
+        .metric-item .salary {
+            color: var(--neon-green);
+            font-weight: 700;
+        }
+
+        /* NEW: Exact Pathways Section (Degrees / Diplomas / Courses) */
+        .pathways-section {
+            margin-bottom: 24px;
+        }
+
+        .pathway-category {
+            margin-bottom: 16px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .badge-cat {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .category-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pathway-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .pathway-card:hover {
+            border-color: var(--border-glow);
+            background: rgba(99, 102, 241, 0.06);
+            transform: translateX(4px);
+        }
+
+        .pathway-title {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #f3f4f6;
+        }
+
+        .pathway-meta {
+            font-size: 0.78rem;
+            color: var(--text-body);
+            margin-top: 2px;
+        }
+
+        .pathway-tag {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #a5b4fc;
+            background: rgba(99, 102, 241, 0.15);
+            padding: 4px 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        .timeline-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 12px 0 20px 0;
+        }
+
+        .t-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--primary);
+            padding: 10px 14px;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.86rem;
+        }
+
+        .t-card strong {
+            color: #c7d2fe;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .export-row {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-export {
+            background: var(--grad-brand);
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.88rem;
+            padding: 12px 22px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-export:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+        }
+
+        .input-dock {
+            padding: 20px 30px;
+            background: rgba(13, 17, 34, 0.95);
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            gap: 12px;
+        }
+
+        .dock-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            padding: 15px 22px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .dock-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+        }
+
+        .dock-btn {
+            background: var(--grad-brand);
+            border: none;
+            border-radius: 14px;
+            padding: 0 30px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dock-btn:hover { opacity: 0.95; transform: scale(1.02); }
+    </style>
+</head>
+<body>
+
+    <header class="top-navbar">
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+            <div class="brand-text">
+                <h1>CareerCraft Pro</h1>
+                <p>Student Academic & Degree Trajectory Agent</p>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="live-chip">
+                <span class="pulse-dot"></span>
+                <span>Advisor Active</span>
+            </div>
+            <button class="btn-reset-nav" onclick="pageTransitionRestart()">↺ Restart</button>
+        </div>
+    </header>
+
+    <main class="workspace">
+        <div class="chat-shell" id="chat-shell">
+            <section class="chat-stream" id="chat-feed"></section>
+
+            <footer class="input-dock">
+                <input type="text" id="user-input" class="dock-input" placeholder="Select an option above or type your inquiry..." onkeypress="handleKey(event)">
+                <button class="dock-btn" onclick="sendInput()">Send 🚀</button>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+        const chatFeed = document.getElementById("chat-feed");
+        const userInput = document.getElementById("user-input");
+        const chatShell = document.getElementById("chat-shell");
+
+        window.onload = () => triggerStart();
+
+        function pageTransitionRestart() {
+            chatShell.style.opacity = "0";
+            chatShell.style.transform = "translateY(12px)";
+            setTimeout(() => {
+                chatFeed.innerHTML = "";
+                sendInput('restart');
+                chatShell.style.opacity = "1";
+                chatShell.style.transform = "translateY(0)";
+            }, 250);
+        }
+
+        async function triggerStart() {
+            const res = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: "start" })
+            });
+            const data = await res.json();
+            renderBot(data.reply, data.options, data.recommendation);
+        }
+
+        function handleKey(e) { if (e.key === "Enter") sendInput(); }
+
+        async function sendInput(customText = null) {
+            const text = customText ? customText : userInput.value.trim();
+            if (!text) return;
+
+            renderUser(text);
+            if (!customText) userInput.value = "";
+
+            const res = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await res.json();
+            renderBot(data.reply, data.options, data.recommendation);
+        }
+
+        function renderUser(text) {
+            const row = document.createElement("div");
+            row.className = "message-bubble-row user";
+            row.innerHTML = `<div class="avatar-box user">👤</div><div class="bubble-content">${text}</div>`;
+            chatFeed.appendChild(row);
+            chatFeed.scrollTop = chatFeed.scrollHeight;
+        }
+
+        function renderBot(text, options = [], rec = null) {
+            const row = document.createElement("div");
+            row.className = "message-bubble-row bot";
+
+            let optionsHtml = "";
+            if (options && options.length > 0) {
+                optionsHtml = `<div class="cards-grid">` +
+                    options.map(opt => `
+                        <div class="interactive-card" onclick="cardSelectMotion(this, '${opt.replace(/'/g, "\\'")}')">
+                            <span>${opt}</span>
+                            <span class="arrow">→</span>
+                        </div>
+                    `).join('') +
+                    `</div>`;
+            }
+
+            let recHtml = "";
+            const canvasId = "radar-" + Date.now();
+
+            if (rec && rec.pathways) {
+                recHtml = `
+                    <div class="dashboard-banner">
+                        <div class="dash-top">
+                            <div class="dash-header">
+                                <h3>${rec.icon} ${rec.title}</h3>
+                                <p>${rec.tagline}</p>
+                            </div>
+                            <div class="demand-badge">${rec.market_demand}</div>
+                        </div>
+
+                        <!-- Visual Radar & Market Compensation -->
+                        <div class="visual-row">
+                            <div class="chart-pod">
+                                <canvas id="${canvasId}"></canvas>
+                            </div>
+                            <div class="metric-pod">
+                                <div style="font-weight:700; font-size:0.9rem; color:#c7d2fe;">Market Compensation Metrics</div>
+                                <div class="metric-item"><span>Entry Level / Intern</span><span class="salary">${rec.salary_tiers.Junior}</span></div>
+                                <div class="metric-item"><span>Mid-Level (2-4 Years)</span><span class="salary">${rec.salary_tiers.Mid}</span></div>
+                                <div class="metric-item"><span>Lead / Architect</span><span class="salary">${rec.salary_tiers.Lead}</span></div>
+                            </div>
+                        </div>
+
+                        <!-- EXACT STUDENT PATHWAYS: DEGREES vs DIPLOMAS vs COURSES -->
+                        <div class="pathways-section">
+                            <!-- 1. DEGREES -->
+                            <div class="pathway-category">
+                                <div class="category-header">
+                                    <span class="badge-cat" style="background:var(--badge-degree);">DEGREE</span>
+                                    <span>Recommended Degree Programs</span>
+                                </div>
+                                <div class="category-items">
+                                    ${rec.pathways.degrees.map(d => `
+                                        <div class="pathway-card">
+                                            <div>
+                                                <div class="pathway-title">🎓 ${d.name}</div>
+                                                <div class="pathway-meta">Eligibility: ${d.eligibility}</div>
+                                            </div>
+                                            <span class="pathway-tag">${d.duration}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- 2. DIPLOMAS -->
+                            <div class="pathway-category">
+                                <div class="category-header">
+                                    <span class="badge-cat" style="background:var(--badge-diploma);">DIPLOMA</span>
+                                    <span>Specialized Diploma / PG Diploma Options</span>
+                                </div>
+                                <div class="category-items">
+                                    ${rec.pathways.diplomas.map(dp => `
+                                        <div class="pathway-card">
+                                            <div>
+                                                <div class="pathway-title">📜 ${dp.name}</div>
+                                                <div class="pathway-meta">Eligibility: ${dp.eligibility}</div>
+                                            </div>
+                                            <span class="pathway-tag">${dp.duration}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- 3. CERTIFICATIONS -->
+                            <div class="pathway-category">
+                                <div class="category-header">
+                                    <span class="badge-cat" style="background:var(--badge-course);">COURSE</span>
+                                    <span>Top Industry Online Certifications</span>
+                                </div>
+                                <div class="category-items">
+                                    ${rec.pathways.certifications.map(c => `
+                                        <div class="pathway-card">
+                                            <div>
+                                                <div class="pathway-title">⚡ ${c.name}</div>
+                                                <div class="pathway-meta">Platform: ${c.platform}</div>
+                                            </div>
+                                            <span class="pathway-tag">${c.duration}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Semester Roadmap -->
+                        <div style="font-size:0.85rem; font-weight:700; color:var(--text-body); text-transform:uppercase;">🗓️ Recommended Learning Milestones</div>
+                        <div class="timeline-box">
+                            ${rec.roadmap.map(step => `
+                                <div class="t-card">
+                                    <strong>📍 ${step.phase}</strong>
+                                    <span>${step.desc}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="export-row">
+                            <button class="btn-export" onclick="window.print()">📥 Download Student Academic Blueprint (PDF)</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            row.innerHTML = `
+                <div class="avatar-box bot">🤖</div>
+                <div style="flex:1;">
+                    <div class="bubble-content">${formatMarkdown(text)}</div>
+                    ${recHtml}
+                    ${optionsHtml}
+                </div>
+            `;
+
+            chatFeed.appendChild(row);
+            chatFeed.scrollTop = chatFeed.scrollHeight;
+
+            if (rec && rec.radar_profile) {
+                setTimeout(() => {
+                    const ctx = document.getElementById(canvasId).getContext('2d');
+                    new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: Object.keys(rec.radar_profile),
+                            datasets: [{
+                                label: 'Match %',
+                                data: Object.values(rec.radar_profile),
+                                backgroundColor: 'rgba(99, 102, 241, 0.28)',
+                                borderColor: '#818cf8',
+                                borderWidth: 2.5,
+                                pointBackgroundColor: '#ec4899',
+                                pointBorderColor: '#fff',
+                                pointRadius: 4
+                            }]
+                        },
+                        options: {
+                            animation: { duration: 1000, easing: 'easeOutQuart' },
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    angleLines: { color: 'rgba(255,255,255,0.08)' },
+                                    grid: { color: 'rgba(255,255,255,0.08)' },
+                                    pointLabels: { color: '#c7d2fe', font: { size: 10, family: 'Outfit' } },
+                                    ticks: { display: false, max: 100 }
+                                }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }, 100);
+            }
+        }
+
+        function cardSelectMotion(element, value) {
+            element.style.transform = "scale(0.96)";
+            element.style.borderColor = "#ec4899";
+            setTimeout(() => { sendInput(value); }, 150);
+        }
+
+        function formatMarkdown(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                .replace(/### (.*?)\n/g, '<h3 style="margin:8px 0; color:#c7d2fe;">$1</h3>');
+        }
+    </script>
+</body>
+</html>
